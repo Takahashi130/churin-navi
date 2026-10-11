@@ -1,0 +1,32 @@
+[
+  {
+    "id": "shinjuku-higashiguchi-1",
+    "name": "新宿駅東口自転車駐輪場①",
+    "location": { "lat": 35.6915954, "lng": 139.7016371 },
+    "osmId": "way/1203906504",
+    "bicycle": true,
+    "temporaryUse": true,
+    "pricing": { "freeMinutes": 120, "unitMinutes": 240, "unitYen": 110, "note": "ICカード決済は100円" },
+    "payment": ["現金", "ICカード"],
+    "source": {
+      "url": "https://www.city.shinjuku.lg.jp/content/000448689.pdf",
+      "checkedAt": "2026-10-11",
+      "note": "新宿区「新宿駅周辺」駐輪場案内PDF（運営: NCD株式会社）。時間利用の料金欄あり・定期利用欄なし。OSMの名称・運営者・収容台数42台が一致することで紐づけ。現地未確認"
+    }
+  },
+  {
+    "id": "shinjuku-higashiguchi-2",
+    "name": "新宿駅東口自転車駐輪場②",
+    "location": { "lat": 35.6910597, "lng": 139.7017095 },
+    "osmId": "way/1204012530",
+    "bicycle": true,
+    "temporaryUse": true,
+    "pricing": { "freeMinutes": 120, "unitMinutes": 240, "unitYen": 110, "note": "ICカード決済は100円" },
+    "payment": ["現金", "ICカード"],
+    "source": {
+      "url": "https://www.city.shinjuku.lg.jp/content/000448689.pdf",
+      "checkedAt": "2026-10-11",
+      "note": "新宿区「新宿駅周辺」駐輪場案内PDF（運営: NCD株式会社）。時間利用の料金欄あり・定期利用欄なし。OSMの名称・運営者・収容台数49台が一致することで紐づけ。現地未確認"
+    }
+  }
+]

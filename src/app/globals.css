@@ -1,0 +1,546 @@
+:root {
+  --bg: #ffffff;
+  --fg: #1f1f1f;
+  --muted: #5e5e5e;
+  --panel: #ffffff;
+  --border: #dadce0;
+  --primary: #1a73e8;
+  --verified: #188038;
+  --bicycle: #1a73e8;
+  --candidate: #80868b;
+  --warn-bg: #fef7e0;
+  --warn-fg: #7a4f01;
+  --error-bg: #fce8e6;
+  --error-fg: #a50e0e;
+  --grid: #e8eaed;
+  --shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #202124;
+    --fg: #e8eaed;
+    --muted: #bdc1c6;
+    --panel: #2d2e31;
+    --border: #5f6368;
+    --primary: #8ab4f8;
+    --grid: #3c4043;
+    --warn-bg: #4a3b10;
+    --warn-fg: #fde293;
+    --error-bg: #5c1d1a;
+    --error-fg: #f6aea9;
+    color-scheme: dark;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
+  font-size: 18px;
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior: none;
+}
+
+button,
+a.primary,
+a.secondary {
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+.map-area {
+  position: absolute;
+  inset: 0;
+}
+
+.demo-map {
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  display: block;
+}
+.demo-north {
+  font-size: 36px;
+  fill: var(--muted);
+}
+.demo-pin.verified { fill: var(--verified); }
+.demo-pin.bicycle { fill: #1a73e8; }
+.demo-pin.candidate { fill: var(--candidate); }
+
+.demo-banner {
+  position: absolute;
+  top: env(safe-area-inset-top, 0);
+  left: 0;
+  right: 0;
+  background: #b3261e;
+  color: #fff;
+  font-weight: 700;
+  padding: 10px 16px;
+  text-align: center;
+  font-size: 16px;
+  z-index: 30;
+}
+
+.top-status {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  left: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  z-index: 20;
+  pointer-events: none;
+}
+.demo-banner ~ .top-status {
+  top: calc(env(safe-area-inset-top, 0px) + 80px);
+}
+.chip {
+  background: var(--panel);
+  color: var(--fg);
+  border-radius: 999px;
+  padding: 8px 14px;
+  box-shadow: var(--shadow);
+  font-size: 16px;
+}
+.chip.warn {
+  background: var(--warn-bg);
+  color: var(--warn-fg);
+  border-radius: 12px;
+}
+.chip.error {
+  background: var(--error-bg);
+  color: var(--error-fg);
+  border-radius: 12px;
+}
+
+/* 下端にボタン列とパネルを積む。ボタンは右手の親指が届く位置 */
+.bottom-stack {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+}
+.bottom-stack > * {
+  pointer-events: auto;
+}
+.fab-column {
+  align-self: flex-end;
+  margin: 0 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.fab {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: none;
+  background: var(--panel);
+  color: var(--fg);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  line-height: 1;
+}
+.fab small {
+  font-size: 11px;
+  margin-top: 2px;
+}
+.fab:disabled {
+  opacity: 0.5;
+}
+
+.bottom-panel,
+.sheet,
+.pending-bar {
+  position: relative;
+  background: var(--panel);
+  border-radius: 18px 18px 0 0;
+  box-shadow: var(--shadow);
+  padding: 14px 16px calc(env(safe-area-inset-bottom, 0px) + 14px);
+  z-index: 25;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.summary strong {
+  font-size: 26px;
+}
+.summary span {
+  color: var(--muted);
+  font-size: 15px;
+}
+.empty {
+  margin: 8px 0 0;
+  font-weight: 700;
+}
+
+.radius-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.radius {
+  flex: 1;
+  min-height: 52px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  background: transparent;
+  color: var(--fg);
+  font-size: 16px;
+  font-weight: 600;
+}
+.radius.active {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
+}
+@media (prefers-color-scheme: dark) {
+  .radius.active { color: #202124; }
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 15px;
+  min-height: 44px;
+}
+.toggle input {
+  width: 24px;
+  height: 24px;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: -1px;
+}
+.dot.verified { background: var(--verified); }
+.dot.bicycle { background: #1a73e8; }
+.dot.candidate { background: var(--candidate); }
+
+button.primary,
+a.primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 56px;
+  border: none;
+  border-radius: 14px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 19px;
+  text-decoration: none;
+}
+@media (prefers-color-scheme: dark) {
+  button.primary, a.primary { color: #202124; }
+}
+a.primary.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+button.secondary,
+a.secondary {
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  background: transparent;
+  color: var(--fg);
+  font-weight: 600;
+  font-size: 16px;
+}
+.link-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 10px;
+  text-decoration: none;
+  text-align: center;
+}
+
+.pending-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sheet {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+.sheet.list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: calc(env(safe-area-inset-top, 0px) + 40px);
+  max-height: none;
+  z-index: 40;
+}
+.sheet-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.sheet-head h2 {
+  margin: 4px 0 8px;
+  font-size: 22px;
+  line-height: 1.3;
+}
+.close {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: var(--grid);
+  color: var(--fg);
+  font-size: 20px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+.badge.verified { background: var(--verified); }
+.badge.bicycle { background: #1a73e8; }
+.badge.candidate { background: var(--candidate); }
+
+.distance {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 12px 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+.distance small {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--muted);
+}
+.arrow {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.info {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 12px;
+  margin: 14px 0 4px;
+  font-size: 16px;
+}
+.info dt {
+  color: var(--muted);
+}
+.info dd {
+  margin: 0;
+}
+.info dd.unconfirmed {
+  color: var(--warn-fg);
+  font-weight: 600;
+}
+
+.note {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 6px 0;
+}
+
+.photos figure {
+  margin: 10px 0;
+}
+.photos img {
+  width: 100%;
+  border-radius: 10px;
+  display: block;
+}
+.photos figcaption {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 14px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+.sources a {
+  color: var(--muted);
+}
+
+.facility-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.facility-list li {
+  border-bottom: 1px solid var(--border);
+}
+.facility-list li.empty {
+  padding: 16px 0;
+}
+.facility-list button {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--fg);
+  padding: 14px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.facility-list .row1 {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+.facility-list .dist {
+  flex: none;
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 16px;
+}
+.facility-list .name {
+  font-size: 18px;
+  font-weight: 600;
+}
+.facility-list .fee {
+  font-size: 14px;
+  color: var(--muted);
+}
+.search-meta {
+  margin-top: 14px;
+}
+
+/* Google Maps 上のピン */
+.pin {
+  width: 40px;
+  height: 40px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 800;
+  font-size: 18px;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+.pin > * {
+  transform: rotate(45deg);
+}
+.pin.verified { background: var(--verified); }
+.pin.bicycle { background: #1a73e8; }
+.pin.candidate { background: var(--candidate); }
+.pin.selected {
+  width: 52px;
+  height: 52px;
+  font-size: 22px;
+  outline: 3px solid #fbbc04;
+}
+.user-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #1a73e8;
+  border: 4px solid #fff;
+  box-shadow: 0 0 0 8px rgba(26, 115, 232, 0.25);
+  transform: translateY(50%);
+}
+.search-center {
+  font-size: 22px;
+  font-weight: 800;
+  color: #b3261e;
+  transform: translateY(50%);
+}
+.pending-pin {
+  background: #b3261e;
+  color: #fff;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+.map-failed {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 24px;
+  padding-bottom: 45vh;
+  background: var(--grid);
+  font-size: 16px;
+}
+.map-failed p {
+  margin: 4px 0;
+}
