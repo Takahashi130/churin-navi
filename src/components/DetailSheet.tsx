@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import type { Facility } from "@/lib/types";
-import { directionLabel, formatStraightDistance } from "@/lib/geo";
 import { feeDisplay } from "@/lib/pricing";
 import TierBadge from "./TierBadge";
 
@@ -14,7 +13,6 @@ export function routeUrl(f: Facility): string {
 
 export default function DetailSheet({ facility: f, demo, onClose }: { facility: Facility; demo: boolean; onClose: () => void }) {
   const [showPhotos, setShowPhotos] = useState(false);
-  const dir = directionLabel(f.bearingDeg);
   const fee = feeDisplay(f);
 
   return (
@@ -27,13 +25,6 @@ export default function DetailSheet({ facility: f, demo, onClose }: { facility: 
       </div>
       <TierBadge tier={f.tier} />
 
-      <p className="distance">
-        <span className="arrow" style={{ transform: `rotate(${f.bearingDeg}deg)` }} aria-hidden>
-          ↑
-        </span>
-        {dir.name}へ {formatStraightDistance(f.distanceM)}
-        <small>（道のりではありません）</small>
-      </p>
 
       <a
         className={`primary big route${demo ? " disabled" : ""}`}

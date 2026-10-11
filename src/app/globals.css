@@ -482,8 +482,8 @@ a.secondary {
 
 /* Google Maps 上のピン */
 .pin {
-  width: 40px;
-  height: 40px;
+  width: 22px;
+  height: 22px;
   border-radius: 50% 50% 50% 0;
   transform: rotate(-45deg);
   display: flex;
@@ -491,9 +491,9 @@ a.secondary {
   justify-content: center;
   color: #fff;
   font-weight: 800;
-  font-size: 18px;
-  border: 3px solid #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  font-size: 11px;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
 }
 .pin > * {
   transform: rotate(45deg);
@@ -502,10 +502,10 @@ a.secondary {
 .pin.bicycle { background: #1a73e8; }
 .pin.candidate { background: var(--candidate); }
 .pin.selected {
-  width: 52px;
-  height: 52px;
-  font-size: 22px;
-  outline: 3px solid #fbbc04;
+  width: 30px;
+  height: 30px;
+  font-size: 14px;
+  outline: 2px solid #fbbc04;
 }
 .user-dot {
   width: 22px;
