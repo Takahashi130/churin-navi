@@ -93,8 +93,8 @@ export default function DetailSheet({ facility: f, demo, onClose }: { facility: 
       {photos.length > 0 && (
         <div className="photos">
           {/* 1枚目は自動表示（1回の表示で Place Photos を1リクエスト）。残りは押した時だけ読む */}
-          {(showAllPhotos ? photos : photos.slice(0, 1)).map((ph) => (
-            <PhotoFigure key={ph.name} photo={ph} alt={`${f.name} の写真`} />
+          {(showAllPhotos ? photos : photos.slice(0, 1)).map((ph, i) => (
+            <PhotoFigure key={ph.name} photo={ph} alt={`${f.name} の写真`} eager={i === 0} />
           ))}
           {!showAllPhotos && photos.length > 1 && (
             <button className="secondary link-btn" onClick={() => setShowAllPhotos(true)}>
@@ -110,11 +110,11 @@ export default function DetailSheet({ facility: f, demo, onClose }: { facility: 
   );
 }
 
-function PhotoFigure({ photo, alt }: { photo: Photo; alt: string }) {
+function PhotoFigure({ photo, alt, eager }: { photo: Photo; alt: string; eager: boolean }) {
   return (
     <figure>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`/api/photo?name=${encodeURIComponent(photo.name)}`} alt={alt} loading="lazy" />
+      <img src={`/api/photo?name=${encodeURIComponent(photo.name)}`} alt={alt} loading={eager ? "eager" : "lazy"} />
       {photo.authors.length > 0 && (
         <figcaption>
           写真:{" "}
