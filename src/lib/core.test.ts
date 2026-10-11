@@ -80,3 +80,33 @@ test("統合: 確認済みで昇格・定期専用は除外・近接Googleは統
   assert.equal(r.facilities[2].tier, "candidate");
   assert.equal(r.excludedByVerified, 1);
 });
+
+import { parseVerifyRequest, upsertEntry } from "./verify-entry.ts";
+
+test("確認結果の入力検証", () => {
+  assert.equal(typeof parseVerifyRequest({ facility: { id: "evil id", location: C }, result: "temporary" }), "string");
+  assert.equal(typeof parseVerifyRequest({ facility: { id: "osm:way/1", location: C }, result: "maybe" }), "string");
+  const ok = parseVerifyRequest({ facility: { id: "osm:way/1", name: "A", location: C }, result: "temporary", pricing: { freeMinutes: 120, unitYen: "100" } });
+  assert.notEqual(typeof ok, "string");
+  if (typeof ok !== "string") assert.deepEqual([ok.pricing?.freeMinutes, ok.pricing?.unitYen], [120, 100]);
+});
+
+test("確認結果の保存: OSMは座標とID、Googleのみは座標を保存しない、同じ施設は置き換え", () => {
+  const osmReq = parseVerifyRequest({ facility: { id: "osm:way/9", name: "OSM駐輪場", location: C }, result: "temporary" });
+  const gReq = parseVerifyRequest({ facility: { id: "google:G9", name: "G駐輪場", location: C, googlePlaceId: "G9" }, result: "monthly" });
+  if (typeof osmReq === "string" || typeof gReq === "string") throw new Error("parse failed");
+  let { list } = upsertEntry([], osmReq);
+  ({ list } = upsertEntry(list, gReq));
+  assert.equal(list.length, 2);
+  assert.equal(list[0].osmId, "way/9");
+  assert.deepEqual(list[0].location, C);
+  assert.equal(list[0].temporaryUse, true);
+  assert.equal(list[1].location, undefined);
+  assert.equal(list[1].googlePlaceId, "G9");
+  assert.equal(list[1].temporaryUse, false);
+  const again = parseVerifyRequest({ facility: { id: "osm:way/9", name: "OSM駐輪場", location: C }, result: "notBicycle" });
+  if (typeof again === "string") throw new Error("parse failed");
+  ({ list } = upsertEntry(list, again));
+  assert.equal(list.length, 2);
+  assert.equal(list[0].bicycle, false);
+});

@@ -7,6 +7,8 @@ import GoogleMapView from "./GoogleMapView";
 import DemoMapView from "./DemoMapView";
 import DetailSheet from "./DetailSheet";
 import ListSheet from "./ListSheet";
+import FeedbackSheet from "./FeedbackSheet";
+import type { ConfirmedInfo } from "./ConfirmForm";
 
 /** 位置情報が使えない時の初期表示（新宿駅） */
 const FALLBACK_CENTER: LatLng = { lat: 35.6896, lng: 139.7006 };
@@ -61,6 +63,8 @@ export default function App({ mapsKey, mapId, demo }: Props) {
   const [selectedId, setSelectedId] = useState<string>();
   const [showCandidates, setShowCandidates] = useState(false);
   const [listOpen, setListOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [toast, setToast] = useState<string>();
   const [fitKey, setFitKey] = useState(0);
   const [panTo, setPanTo] = useState<{ pos: LatLng; key: number }>();
   const reqId = useRef(0);
@@ -80,11 +84,18 @@ export default function App({ mapsKey, mapId, demo }: Props) {
           await new Promise((res) => setTimeout(res, 300));
           data = demoSearch(center, r);
         } else {
-          const res = await fetch(`/api/search?lat=${center.lat.toFixed(6)}&lng=${center.lng.toFixed(6)}&r=${r}`, {
-            cache: "no-store",
-          });
+          const url = `/api/search?lat=${center.lat.toFixed(6)}&lng=${center.lng.toFixed(6)}&r=${r}`;
+          const res = await fetch(url, { cache: "no-store" });
           if (!res.ok) throw new Error(`検索に失敗しました（HTTP ${res.status}）`);
           data = await res.json();
+          // OSM の公開サーバーはときどき混雑で落ちる。自転車用が取れなかった時だけ1回自動でやり直す
+          if (!data.status.osm.ok && id === reqId.current) {
+            const retry = await fetch(url, { cache: "no-store" }).catch(() => undefined);
+            if (retry?.ok) {
+              const again: SearchResponse = await retry.json();
+              if (again.status.osm.ok) data = again;
+            }
+          }
         }
         if (id !== reqId.current) return;
         setResult(data);
@@ -175,6 +186,38 @@ export default function App({ mapsKey, mapId, demo }: Props) {
 
   const busy = loading || locating;
 
+  /** 確認結果を登録したら、再デプロイを待たずにこの画面の表示だけ先に変える */
+  const applyConfirmed = (id: string, info: ConfirmedInfo) => {
+    setResult((cur) => {
+      if (!cur) return cur;
+      if (info.result !== "temporary") {
+        return { ...cur, facilities: cur.facilities.filter((f) => f.id !== id) };
+      }
+      return {
+        ...cur,
+        facilities: cur.facilities.map((f) =>
+          f.id === id
+            ? {
+                ...f,
+                tier: "verified",
+                sources: f.sources.includes("verified") ? f.sources : ["verified", ...f.sources],
+                pricing: info.pricing ?? f.pricing,
+                payment: info.payment ?? f.payment,
+                verifiedSource: { checkedAt: info.checkedAt, note: "現地確認（アプリから登録）" },
+              }
+            : f,
+        ),
+      };
+    });
+    if (info.result !== "temporary") setSelectedId(undefined);
+    setToast(
+      info.result === "temporary"
+        ? "確認済みにしました。1分ほどで全端末に反映されます"
+        : "登録しました。この施設は今後表示されません",
+    );
+    setTimeout(() => setToast(undefined), 5000);
+  };
+
   return (
     <main className="app">
       <div className="map-area">
@@ -220,7 +263,13 @@ export default function App({ mapsKey, mapId, demo }: Props) {
       )}
 
       {selected ? (
-        <DetailSheet key={selected.id} facility={selected} demo={demo} onClose={() => setSelectedId(undefined)} />
+        <DetailSheet
+          key={selected.id}
+          facility={selected}
+          demo={demo}
+          onClose={() => setSelectedId(undefined)}
+          onConfirmed={(info) => applyConfirmed(selected.id, info)}
+        />
       ) : (
         !pending && (
           <section className="bottom-panel">
@@ -271,11 +320,30 @@ export default function App({ mapsKey, mapId, demo }: Props) {
             )}
 
             {result && <Legend />}
+
+            {!demo && (
+              <button className="feedback-link" onClick={() => setFeedbackOpen(true)}>
+                ✉ 開発への要望を送る
+              </button>
+            )}
           </section>
         )
       )}
 
       </div>
+
+      {toast && (
+        <div className="toast" role="status">
+          {toast}
+        </div>
+      )}
+
+      {feedbackOpen && (
+        <FeedbackSheet
+          context={selected ? `詳細: ${selected.name}` : result ? `検索結果 ${visible.length}件・半径${radius}m` : "起動直後"}
+          onClose={() => setFeedbackOpen(false)}
+        />
+      )}
 
       {listOpen && result && (
         <ListSheet

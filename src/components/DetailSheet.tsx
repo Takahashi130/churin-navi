@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Facility, Photo } from "@/lib/types";
 import { feeDisplay } from "@/lib/pricing";
 import TierBadge from "./TierBadge";
+import ConfirmForm, { type ConfirmedInfo } from "./ConfirmForm";
 
 export function routeUrl(f: Facility): string {
   const p = new URLSearchParams({ api: "1", destination: `${f.location.lat},${f.location.lng}` });
@@ -11,7 +12,9 @@ export function routeUrl(f: Facility): string {
   return `https://www.google.com/maps/dir/?${p.toString()}`;
 }
 
-export default function DetailSheet({ facility: f, demo, onClose }: { facility: Facility; demo: boolean; onClose: () => void }) {
+type Props = { facility: Facility; demo: boolean; onClose: () => void; onConfirmed: (info: ConfirmedInfo) => void };
+
+export default function DetailSheet({ facility: f, demo, onClose, onConfirmed }: Props) {
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const photos = f.photos ?? [];
   const fee = feeDisplay(f);
@@ -104,6 +107,8 @@ export default function DetailSheet({ facility: f, demo, onClose }: { facility: 
           <p className="note">写真は Google Maps のユーザー投稿等で、この施設の写真とは限りません。</p>
         </div>
       )}
+
+      {!demo && <ConfirmForm facility={f} onDone={onConfirmed} />}
 
       <Sources f={f} />
     </section>
