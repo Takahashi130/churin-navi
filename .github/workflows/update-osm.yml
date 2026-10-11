@@ -1,0 +1,32 @@
+# 同梱している東京都内の OSM 自転車駐車場データを毎週更新する。
+# 変更があれば main にコミットし、Vercel が自動で再デプロイする。
+name: Update OSM snapshot
+
+on:
+  schedule:
+    - cron: "0 19 * * 0" # 毎週月曜 4:00 JST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node scripts/fetch-osm.mjs
+      - name: Commit if changed
+        run: |
+          if git diff --quiet src/data/osm-tokyo.json; then
+            echo "変更なし"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/osm-tokyo.json
+          git commit -m "OSM 駐輪場データを更新"
+          git push
