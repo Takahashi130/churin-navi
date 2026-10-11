@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { searchOsm } from "@/lib/osm.ts";
+import { searchOsmFast } from "@/lib/osm-snapshot.ts";
 import { searchGoogle } from "@/lib/google.ts";
 import { mergeFacilities } from "@/lib/merge.ts";
 import { loadVerified } from "@/lib/verified.ts";
@@ -25,11 +25,12 @@ export async function GET(req: NextRequest) {
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
 
   const [osmRes, googleRes] = await Promise.allSettled([
-    searchOsm(center, radiusM),
+    searchOsmFast(center, radiusM),
     apiKey ? searchGoogle(center, radiusM, apiKey) : Promise.reject(new Error("GOOGLE_PLACES_API_KEY が未設定")),
   ]);
 
-  const osm: Facility[] = osmRes.status === "fulfilled" ? osmRes.value : [];
+  const osm: Facility[] = osmRes.status === "fulfilled" ? osmRes.value.facilities : [];
+  const snapshotAt = osmRes.status === "fulfilled" ? osmRes.value.snapshotAt : undefined;
   const google = googleRes.status === "fulfilled" ? googleRes.value : undefined;
   const verified = loadVerified();
   const merged = mergeFacilities(center, radiusM, osm, google?.facilities ?? [], verified);
@@ -51,7 +52,11 @@ export async function GET(req: NextRequest) {
     status: {
       osm:
         osmRes.status === "fulfilled"
-          ? { ok: true, count: osm.length }
+          ? {
+              ok: true,
+              count: osm.length,
+              message: snapshotAt ? `同梱データ（${snapshotAt.slice(0, 10)}時点）` : "Overpass から取得",
+            }
           : { ok: false, count: 0, message: (osmRes.reason as Error).message },
       google: google
         ? {

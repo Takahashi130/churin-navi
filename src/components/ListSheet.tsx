@@ -50,7 +50,7 @@ export default function ListSheet({ result, facilities, onPick, onClose }: Props
           </p>
         ))}
         <p className="note">
-          データ: OpenStreetMap {status.osm.ok ? `${status.osm.count}件` : `取得失敗/未使用（${status.osm.message ?? ""}）`}
+          データ: OpenStreetMap {status.osm.ok ? `${status.osm.count}件（${status.osm.message ?? ""}）` :`取得失敗/未使用（${status.osm.message ?? ""}）`}
           ／ Google {status.google.ok ? `${status.google.count}件（${status.google.message}）` : `未使用（${status.google.message ?? ""}）`}
           ／ 確認済み {status.verified.count}件
         </p>

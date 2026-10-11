@@ -117,3 +117,10 @@ URL を知っている人なら誰でも開けるので、自分用に絞りた�
 - Vercel に次の2つを Secret として設定してください。
   - `GITHUB_TOKEN`：fine-grained token。対象リポジトリは churin-navi のみ、権限は Contents と Issues の Read and write。
   - `APP_PASSCODE`：自分で決めた合言葉。
+
+## OSM データの同梱と更新
+
+- 検索を速くするため、東京都本土の OSM 自転車駐車場（約6,300件・約780KB）を `src/data/osm-tokyo.json` に同梱しています。都内の検索では外部サーバーに問い合わせません。
+- GitHub Actions（`.github/workflows/update-osm.yml`）が毎週月曜4時（日本時間）に `scripts/fetch-osm.mjs` を実行して更新し、main にコミットします。Vercel が自動で再デプロイします。手動で更新するときは `node scripts/fetch-osm.mjs` を実行します。
+- 都外を検索したときだけ、公開 Overpass サーバーに問い合わせます。
+- このデータは OpenStreetMap 由来なので ODbL 1.0 に従います（© OpenStreetMap contributors）。

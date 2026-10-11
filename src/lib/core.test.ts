@@ -110,3 +110,14 @@ test("確認結果の保存: OSMは座標とID、Googleのみは座標を保存�
   assert.equal(list.length, 2);
   assert.equal(list[0].bicycle, false);
 });
+
+import { searchOsmFast } from "./osm-snapshot.ts";
+
+test("都内は同梱データから即座に返す", async () => {
+  const t = Date.now();
+  const r = await searchOsmFast(C, 500);
+  assert.ok(r.snapshotAt);
+  assert.ok(r.facilities.length > 10);
+  assert.ok(Date.now() - t < 500);
+  assert.ok(r.facilities.some((f) => f.id === "osm:way/1203906504"));
+});

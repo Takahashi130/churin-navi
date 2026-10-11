@@ -30,7 +30,11 @@ export type MapProps = {
   onMapClick: (pos: LatLng) => void;
 };
 
-function getPosition(): Promise<LatLng> {
+const PRECISE: PositionOptions = { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 };
+/** Wi‑Fi・基地局ベースのおおまかな位置。GPS を待たないので数百ms〜数秒で返る */
+const QUICK: PositionOptions = { enableHighAccuracy: false, timeout: 6000, maximumAge: 120000 };
+
+function getPosition(options: PositionOptions = PRECISE): Promise<LatLng> {
   return new Promise((resolve, reject) => {
     if (!("geolocation" in navigator)) return reject(new Error("この端末では位置情報が使えません"));
     navigator.geolocation.getCurrentPosition(
@@ -45,7 +49,7 @@ function getPosition(): Promise<LatLng> {
                 : "現在地を取得できませんでした",
           ),
         ),
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 },
+      options,
     );
   });
 }
@@ -114,10 +118,15 @@ export default function App({ mapsKey, mapId, demo }: Props) {
     async (r: Radius) => {
       setLocating(true);
       try {
-        const pos = await getPosition();
+        // まずおおまかな位置ですぐ検索を始め（500m 圏なら数十mの誤差は問題ない）、取れなければ GPS を待つ
+        const pos = await getPosition(QUICK).catch(() => getPosition(PRECISE));
         setUserPos(pos);
         setGeoError(undefined);
         setLocating(false);
+        // 正確な位置は後から青い点だけ更新する（再検索はしない）
+        void getPosition(PRECISE)
+          .then(setUserPos)
+          .catch(() => {});
         await search(pos, r);
       } catch (e) {
         setGeoError((e as Error).message);

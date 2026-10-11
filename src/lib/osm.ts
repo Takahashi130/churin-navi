@@ -8,7 +8,7 @@ const ENDPOINTS = [
   "https://overpass.private.coffee/api/interpreter",
 ];
 
-type OsmElement = {
+export type OsmElement = {
   type: "node" | "way" | "relation";
   id: number;
   lat?: number;
