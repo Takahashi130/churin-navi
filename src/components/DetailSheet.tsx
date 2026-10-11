@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { Facility } from "@/lib/types";
+import type { Facility, Photo } from "@/lib/types";
 import { feeDisplay } from "@/lib/pricing";
 import TierBadge from "./TierBadge";
 
@@ -12,7 +12,8 @@ export function routeUrl(f: Facility): string {
 }
 
 export default function DetailSheet({ facility: f, demo, onClose }: { facility: Facility; demo: boolean; onClose: () => void }) {
-  const [showPhotos, setShowPhotos] = useState(false);
+  const [showAllPhotos, setShowAllPhotos] = useState(false);
+  const photos = f.photos ?? [];
   const fee = feeDisplay(f);
 
   return (
@@ -24,7 +25,6 @@ export default function DetailSheet({ facility: f, demo, onClose }: { facility: 
         </button>
       </div>
       <TierBadge tier={f.tier} />
-
 
       <a
         className={`primary big route${demo ? " disabled" : ""}`}
@@ -76,12 +76,6 @@ export default function DetailSheet({ facility: f, demo, onClose }: { facility: 
             <dd>{f.operator}</dd>
           </>
         )}
-        {f.address && (
-          <>
-            <dt>住所</dt>
-            <dd>{f.address}</dd>
-          </>
-        )}
         {f.googleName && (
           <>
             <dt>近くのGoogle掲載地点</dt>
@@ -96,41 +90,48 @@ export default function DetailSheet({ facility: f, demo, onClose }: { facility: 
         </a>
       )}
 
-      {f.photos && f.photos.length > 0 && !showPhotos && (
-        <button className="secondary link-btn" onClick={() => setShowPhotos(true)}>
-          写真を見る（Google・{f.photos.length}枚）
-        </button>
-      )}
-      {showPhotos && f.photos && (
+      {photos.length > 0 && (
         <div className="photos">
-          {f.photos.map((ph) => (
-            <figure key={ph.name}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={`/api/photo?name=${encodeURIComponent(ph.name)}`} alt={`${f.name} の写真`} loading="lazy" />
-              {ph.authors.length > 0 && (
-                <figcaption>
-                  写真:{" "}
-                  {ph.authors.map((a, i) => (
-                    <span key={i}>
-                      {a.uri ? (
-                        <a href={a.uri} target="_blank" rel="noopener noreferrer">
-                          {a.displayName}
-                        </a>
-                      ) : (
-                        a.displayName
-                      )}
-                    </span>
-                  ))}
-                </figcaption>
-              )}
-            </figure>
+          {/* 1枚目は自動表示（1回の表示で Place Photos を1リクエスト）。残りは押した時だけ読む */}
+          {(showAllPhotos ? photos : photos.slice(0, 1)).map((ph) => (
+            <PhotoFigure key={ph.name} photo={ph} alt={`${f.name} の写真`} />
           ))}
+          {!showAllPhotos && photos.length > 1 && (
+            <button className="secondary link-btn" onClick={() => setShowAllPhotos(true)}>
+              他の写真を見る（あと{photos.length - 1}枚）
+            </button>
+          )}
           <p className="note">写真は Google Maps のユーザー投稿等で、この施設の写真とは限りません。</p>
         </div>
       )}
 
       <Sources f={f} />
     </section>
+  );
+}
+
+function PhotoFigure({ photo, alt }: { photo: Photo; alt: string }) {
+  return (
+    <figure>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={`/api/photo?name=${encodeURIComponent(photo.name)}`} alt={alt} loading="lazy" />
+      {photo.authors.length > 0 && (
+        <figcaption>
+          写真:{" "}
+          {photo.authors.map((a, i) => (
+            <span key={i}>
+              {a.uri ? (
+                <a href={a.uri} target="_blank" rel="noopener noreferrer">
+                  {a.displayName}
+                </a>
+              ) : (
+                a.displayName
+              )}
+            </span>
+          ))}
+        </figcaption>
+      )}
+    </figure>
   );
 }
 

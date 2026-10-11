@@ -68,7 +68,7 @@ npm test                     # ロジックの単体テスト
 |---|---|---|---|
 | 地図の読み込み | Dynamic Maps | 10,000 | 公式価格表を参照 |
 | 1回の検索 | Text Search **Pro**：500mは2リクエスト、1kmは最大4、2kmは最大6 | 5,000 | $32 / 1,000 |
-| 写真（「写真を見る」を押した時だけ） | Place Details Photos | 1,000 | $7 / 1,000 |
+| 写真（詳細を開くと1枚目を自動表示、2枚目以降は「他の写真を見る」を押した時だけ） | Place Details Photos | 1,000 | $7 / 1,000 |
 
 - 取得するフィールドは Pro SKU に収まるもの（id, displayName, location, shortFormattedAddress, types, primaryType, googleMapsUri, photos）だけに絞っています。
 - 営業時間・電話番号・支払方法は Enterprise 以上の SKU になるため、取得していません。

@@ -220,7 +220,7 @@ export default function App({ mapsKey, mapId, demo }: Props) {
       )}
 
       {selected ? (
-        <DetailSheet facility={selected} demo={demo} onClose={() => setSelectedId(undefined)} />
+        <DetailSheet key={selected.id} facility={selected} demo={demo} onClose={() => setSelectedId(undefined)} />
       ) : (
         !pending && (
           <section className="bottom-panel">
