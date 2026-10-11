@@ -1,5 +1,6 @@
 import type { Facility, LatLng, Pricing } from "./types.ts";
 import { bearingDeg, distanceM } from "./geo.ts";
+import { UNNAMED } from "./osm.ts";
 
 /**
  * 自分で確認した施設データ（src/data/verified.json）の1件。
@@ -114,6 +115,12 @@ function attachGoogle(target: Facility, g: Facility) {
   target.googleMapsUri = g.googleMapsUri;
   target.photos = g.photos;
   target.address = target.address ?? g.address;
-  if (g.name !== target.name) target.googleName = g.name;
+  if (target.name === UNNAMED) {
+    // 名前のない駐輪スペースは、近くの Google 掲載地点の名前で仮に呼ぶ（同一施設とは限らない）
+    target.name = g.name;
+    target.nameFromGoogle = true;
+  } else if (g.name !== target.name) {
+    target.googleName = g.name;
+  }
   if (!target.sources.includes("google")) target.sources.push("google");
 }

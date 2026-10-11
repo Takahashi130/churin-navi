@@ -121,3 +121,17 @@ test("都内は同梱データから即座に返す", async () => {
   assert.ok(Date.now() - t < 500);
   assert.ok(r.facilities.some((f) => f.id === "osm:way/1203906504"));
 });
+
+test("名前のないOSM駐輪場は、近くのGoogle掲載地点の名前で表示する", () => {
+  const unnamed = fac("osm:node/50", "bicycle", off(100, 0), { name: "名称未登録の駐輪スペース" });
+  const named = fac("osm:node/51", "bicycle", off(-100, 0), { name: "A駐輪場" });
+  const g1 = fac("google:H1", "candidate", off(105, 0), { googlePlaceId: "H1", name: "エコステーション21 X" });
+  const g2 = fac("google:H2", "candidate", off(-105, 0), { googlePlaceId: "H2", name: "B駐車場" });
+  const r = mergeFacilities(C, 500, [unnamed, named], [g1, g2], []);
+  const u = r.facilities.find((f) => f.id === "osm:node/50")!;
+  const n = r.facilities.find((f) => f.id === "osm:node/51")!;
+  assert.equal(u.name, "エコステーション21 X");
+  assert.equal(u.nameFromGoogle, true);
+  assert.equal(n.name, "A駐輪場");
+  assert.equal(n.googleName, "B駐車場");
+});

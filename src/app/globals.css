@@ -681,3 +681,8 @@ a.secondary {
   font-weight: 600;
   box-shadow: var(--shadow);
 }
+
+/* 詳細のラベルと経路ボタンの間をあける */
+a.primary.route {
+  margin-top: 12px;
+}

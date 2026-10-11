@@ -60,6 +60,8 @@ export type Facility = {
   googleMapsUri?: string;
   /** Google上の名称（OSM等と統合した場合） */
   googleName?: string;
+  /** 名前は OSM に無く、近くの Google 掲載地点の名前を仮に使っている */
+  nameFromGoogle?: boolean;
   photos?: Photo[];
   /** 確認済みデータの出典 */
   verifiedSource?: { url?: string; checkedAt?: string; note?: string };

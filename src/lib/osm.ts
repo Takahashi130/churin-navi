@@ -17,6 +17,9 @@ export type OsmElement = {
   tags?: Record<string, string>;
 };
 
+/** OSM に名前が登録されていない時の表示名 */
+export const UNNAMED = "名称未登録の駐輪スペース";
+
 /** 一時利用できない／一般に使えない可能性が高い access 値は除外 */
 const EXCLUDED_ACCESS = new Set(["private", "no", "permit", "discouraged", "residents"]);
 
@@ -59,7 +62,7 @@ export function parseOsm(elements: OsmElement[], center: LatLng, radiusM: number
 
     out.push({
       id: `osm:${e.type}/${e.id}`,
-      name: t.name ?? t["name:ja"] ?? "名称未登録の駐輪スペース",
+      name: t.name ?? t["name:ja"] ?? UNNAMED,
       location: loc,
       tier: "bicycle",
       sources: ["osm"],

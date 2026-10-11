@@ -28,6 +28,7 @@ export default function DetailSheet({ facility: f, demo, onClose, onConfirmed }:
         </button>
       </div>
       <TierBadge tier={f.tier} />
+      {f.nameFromGoogle && <p className="note">名前は近くのGoogle掲載地点のものです（同一施設とは限りません）</p>}
 
       <a
         className={`primary big route${demo ? " disabled" : ""}`}

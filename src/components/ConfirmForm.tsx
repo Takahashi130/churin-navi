@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Facility, Pricing } from "@/lib/types";
 import type { VerifyResult } from "@/lib/verify-entry";
 import { clearPasscode, loadPasscode, savePasscode } from "@/lib/stored-passcode";
+import { UNNAMED } from "@/lib/osm";
 import PasscodeField from "./PasscodeField";
 
 const PAYMENTS = ["現金", "交通系IC", "QRコード決済", "クレジットカード"];
@@ -57,7 +58,8 @@ export default function ConfirmForm({ facility: f, onDone }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           passcode,
-          facility: { id: f.id, name: f.name, location: f.location, googlePlaceId: f.googlePlaceId },
+          // Google から借りた仮の名前は保存しない（表示時に毎回 Google から付け直す）
+          facility: { id: f.id, name: f.nameFromGoogle ? UNNAMED : f.name, location: f.location, googlePlaceId: f.googlePlaceId },
           result,
           pricing,
           payment: result === "temporary" && payment.length ? payment : undefined,
