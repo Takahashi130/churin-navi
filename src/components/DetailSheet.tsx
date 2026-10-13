@@ -12,6 +12,12 @@ export function routeUrl(f: Facility): string {
   return `https://www.google.com/maps/dir/?${p.toString()}`;
 }
 
+function placeUrl(f: Facility): string {
+  if (f.googleMapsUri) return f.googleMapsUri;
+  const p = new URLSearchParams({ api: "1", query: `${f.location.lat},${f.location.lng}` });
+  return `https://www.google.com/maps/search/?${p.toString()}`;
+}
+
 type Props = { facility: Facility; demo: boolean; onClose: () => void; onConfirmed: (info: ConfirmedInfo) => void };
 
 export default function DetailSheet({ facility: f, demo, onClose, onConfirmed }: Props) {
@@ -29,6 +35,7 @@ export default function DetailSheet({ facility: f, demo, onClose, onConfirmed }:
       </div>
       <TierBadge tier={f.tier} />
       {f.nameFromGoogle && <p className="note">名前は近くのGoogle掲載地点のものです（同一施設とは限りません）</p>}
+      {f.provisionalName && <p className="note">正式な名前が無いため、近くの目印から付けた仮の名前です</p>}
 
       <a
         className={`primary big route${demo ? " disabled" : ""}`}
@@ -91,6 +98,13 @@ export default function DetailSheet({ facility: f, demo, onClose, onConfirmed }:
       {f.website && (
         <a className="secondary link-btn" href={f.website} target="_blank" rel="noopener noreferrer">
           運営会社のページ（空き状況が載っている場合あり）
+        </a>
+      )}
+
+      {!demo && photos.length === 0 && (
+        // 写真が無い施設は、Google マップでこの地点を開いてストリートビュー等で確認できるようにする（無料のリンク）
+        <a className="secondary link-btn" href={placeUrl(f)} target="_blank" rel="noopener noreferrer">
+          Googleマップでこの場所を見る（写真・ストリートビュー）
         </a>
       )}
 

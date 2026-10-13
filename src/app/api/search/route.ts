@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { searchOsmFast } from "@/lib/osm-snapshot.ts";
+import { searchOsmFast, stationsNear } from "@/lib/osm-snapshot.ts";
+import { assignProvisionalNames } from "@/lib/naming.ts";
 import { searchGoogle } from "@/lib/google.ts";
 import { mergeFacilities } from "@/lib/merge.ts";
 import { loadVerified } from "@/lib/verified.ts";
@@ -34,6 +35,7 @@ export async function GET(req: NextRequest) {
   const google = googleRes.status === "fulfilled" ? googleRes.value : undefined;
   const verified = loadVerified();
   const merged = mergeFacilities(center, radiusM, osm, google?.facilities ?? [], verified);
+  assignProvisionalNames(merged.facilities, google?.landmarks ?? [], stationsNear(center, radiusM + 800));
 
   if (osmRes.status === "rejected") {
     notices.push("OpenStreetMap の取得に失敗したため、自転車用と判別できる施設が表示されていない可能性があります。再検索してください。");

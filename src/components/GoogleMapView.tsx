@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { APIProvider, AdvancedMarker, Map, useMap, useMapsLibrary } from "@vis.gl/react-google-maps";
 import type { MapProps } from "./App";
+import BikeGlyph from "./BikeGlyph";
 import type { LatLng } from "@/lib/types";
 
 const INITIAL_CENTER = { lat: 35.6896, lng: 139.7006 };
@@ -116,7 +117,7 @@ function MapContent({ userPos, searchCenter, radius, facilities, selectedId, pen
           onClick={() => onSelect(f.id)}
         >
           <div className={`pin ${f.tier}${f.id === selectedId ? " selected" : ""}`}>
-            <span>{f.tier === "verified" ? "✓" : f.tier === "bicycle" ? "P" : "?"}</span>
+            <span className="pin-glyph">{f.tier === "verified" ? "✓" : f.tier === "bicycle" ? <BikeGlyph /> : "?"}</span>
           </div>
         </AdvancedMarker>
       ))}

@@ -135,3 +135,20 @@ test("名前のないOSM駐輪場は、近くのGoogle掲載地点の名前で�
   assert.equal(n.name, "A駐輪場");
   assert.equal(n.googleName, "B駐車場");
 });
+
+import { assignProvisionalNames } from "./naming.ts";
+
+test("名前のない駐輪場に仮の名前を付ける（近くの目印→最寄り駅→そのまま）", () => {
+  const near = fac("osm:node/60", "bicycle", off(0, 0), { name: "名称未登録の駐輪スペース" });
+  const st = fac("osm:node/61", "bicycle", off(300, -300), { name: "名称未登録の駐輪スペース" });
+  const far = fac("osm:node/62", "bicycle", off(5000, 5000), { name: "名称未登録の駐輪スペース" });
+  const named = fac("osm:node/63", "bicycle", off(0, 40), { name: "A駐輪場" });
+  const station = { name: "テスト駅", location: off(0, 0) };
+  assignProvisionalNames([near, st, far, named], [{ name: "Bビル", location: off(500, 500) }], [station]);
+  assert.equal(near.name, "A駐輪場付近の駐輪スペース");
+  assert.equal(near.provisionalName, true);
+  assert.equal(st.name, "テスト駅 南東の駐輪スペース");
+  assert.equal(far.name, "名称未登録の駐輪スペース");
+  assert.equal(far.provisionalName, undefined);
+  assert.equal(named.name, "A駐輪場");
+});

@@ -1,4 +1,4 @@
-import type { Facility, LatLng, Photo } from "./types.ts";
+import type { Facility, Landmark, LatLng, Photo } from "./types.ts";
 import { bearingDeg, boundingBox, distanceM } from "./geo.ts";
 
 const ENDPOINT = "https://places.googleapis.com/v1/places:searchText";
@@ -49,6 +49,7 @@ type GPlace = {
 export type GoogleResult = {
   facilities: Facility[];
   requests: number;
+  landmarks: Landmark[];
   droppedNonParking: number;
   truncated: boolean;
 };
@@ -102,10 +103,13 @@ export async function searchGoogle(center: LatLng, radiusM: number, apiKey: stri
   );
 
   const facilities: Facility[] = [];
+  const landmarks: Landmark[] = [];
   let droppedNonParking = 0;
   for (const p of byId.values()) {
     if (!p.location) continue;
     const loc = { lat: p.location.latitude, lng: p.location.longitude };
+    // 駐車場以外も含め、名前のない駐輪場を「◯◯付近」と呼ぶ目印には使う（表示のみ・保存しない）
+    if (p.displayName?.text) landmarks.push({ name: p.displayName.text, location: loc });
     const d = distanceM(center, loc);
     if (d > radiusM) continue; // 矩形で取っているので円の外を落とす
     if (!isParkingLike(p.types)) {
@@ -130,5 +134,5 @@ export async function searchGoogle(center: LatLng, radiusM: number, apiKey: stri
       photos: photos?.length ? photos : undefined,
     });
   }
-  return { facilities, requests, droppedNonParking, truncated };
+  return { facilities, landmarks, requests, droppedNonParking, truncated };
 }

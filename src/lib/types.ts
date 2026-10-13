@@ -62,6 +62,8 @@ export type Facility = {
   googleName?: string;
   /** 名前は OSM に無く、近くの Google 掲載地点の名前を仮に使っている */
   nameFromGoogle?: boolean;
+  /** 名前が無いので近くの目印・駅から付けた仮の名前（「◯◯付近の駐輪スペース」など） */
+  provisionalName?: boolean;
   photos?: Photo[];
   /** 確認済みデータの出典 */
   verifiedSource?: { url?: string; checkedAt?: string; note?: string };
@@ -90,3 +92,6 @@ export type SearchResponse = {
   notices: string[];
   demo: boolean;
 };
+
+/** 名前のない駐輪場に仮の名前を付けるための目印 */
+export type Landmark = { name: string; location: LatLng };

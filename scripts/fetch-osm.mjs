@@ -15,7 +15,8 @@ const ENDPOINTS = [
 /** アプリで使うタグだけ残してサイズを抑える */
 const KEEP = new Set(["amenity", "name", "name:ja", "access", "bicycle", "fee", "charge", "capacity", "opening_hours", "operator", "motorcycle", "website", "contact:website"]);
 
-const query = `[out:json][timeout:180];nwr["amenity"="bicycle_parking"](${BBOX.join(",")});out center tags;`;
+// 駐輪場に加えて、名前のない駐輪場を「◯◯駅 南東の駐輪スペース」と呼ぶための駅も取る
+const query = `[out:json][timeout:180];(nwr["amenity"="bicycle_parking"](${BBOX.join(",")});node["railway"="station"]["name"](${BBOX.join(",")}););out center tags;`;
 
 async function fetchOnce(url) {
   const res = await fetch(url, {
@@ -50,7 +51,28 @@ if (!json) {
 }
 
 const round6 = (n) => Math.round(n * 1e6) / 1e6;
+// 駅は名前ごとに1点（路線ごとに別ノードがあるので重複を除く）
+const stationMap = new Map();
+for (const e of json.elements) {
+  if (e.tags?.railway !== "station" || !e.tags.name || e.lat === undefined) continue;
+  const name = e.tags.name.endsWith("駅") ? e.tags.name : `${e.tags.name}駅`;
+  const list = stationMap.get(name) ?? [];
+  list.push({ name, lat: round6(e.lat), lon: round6(e.lon) });
+  stationMap.set(name, list);
+}
+// 同名の別駅（離れた場所）を潰さないよう、500m以上離れたものは別に残す
+const stations = [];
+for (const list of stationMap.values()) {
+  const kept = [];
+  for (const s of list) {
+    if (!kept.some((k) => Math.abs(k.lat - s.lat) < 0.0045 && Math.abs(k.lon - s.lon) < 0.0055)) kept.push(s);
+  }
+  stations.push(...kept);
+}
+stations.sort((a, b) => a.name.localeCompare(b.name) || a.lat - b.lat);
+
 const elements = json.elements
+  .filter((e) => e.tags?.amenity === "bicycle_parking")
   .map((e) => {
     const lat = e.lat ?? e.center?.lat;
     const lon = e.lon ?? e.center?.lon;
@@ -75,6 +97,7 @@ const out = {
   fetchedAt: json.osm3s?.timestamp_osm_base ?? new Date().toISOString(),
   bbox: BBOX,
   elements,
+  stations,
 };
 writeFileSync(new URL("../src/data/osm-tokyo.json", import.meta.url), JSON.stringify(out) + "\n");
-console.log(`${elements.length}件を保存しました（OSM ${out.fetchedAt}）`);
+console.log(`${elements.length}件・駅${stations.length}件を保存しました（OSM ${out.fetchedAt}）`);

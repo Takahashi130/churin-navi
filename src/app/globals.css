@@ -5,8 +5,8 @@
   --panel: #ffffff;
   --border: #dadce0;
   --primary: #1a73e8;
-  --verified: #188038;
-  --bicycle: #1a73e8;
+  --verified: #0b5c2a;
+  --bicycle: #1e8e3e;
   --candidate: #f9ab00;
   --candidate-fg: #3d2c00;
   --warn-bg: #fef7e0;
@@ -80,7 +80,7 @@ a.secondary {
   fill: var(--muted);
 }
 .demo-pin.verified { fill: var(--verified); }
-.demo-pin.bicycle { fill: #1a73e8; }
+.demo-pin.bicycle { fill: var(--bicycle); }
 .demo-pin.candidate { fill: var(--candidate); }
 
 .demo-banner {
@@ -258,7 +258,7 @@ a.secondary {
   vertical-align: -1px;
 }
 .dot.verified { background: var(--verified); }
-.dot.bicycle { background: #1a73e8; }
+.dot.bicycle { background: var(--bicycle); }
 .dot.candidate { background: var(--candidate); }
 
 button.primary,
@@ -354,7 +354,7 @@ a.secondary {
   color: #fff;
 }
 .badge.verified { background: var(--verified); }
-.badge.bicycle { background: #1a73e8; }
+.badge.bicycle { background: var(--bicycle); }
 .badge.candidate { background: var(--candidate); color: var(--candidate-fg); }
 
 .distance {
@@ -503,7 +503,7 @@ a.secondary {
   transform: rotate(45deg);
 }
 .pin.verified { background: var(--verified); }
-.pin.bicycle { background: #1a73e8; }
+.pin.bicycle { background: var(--bicycle); }
 .pin.candidate { background: var(--candidate); color: var(--candidate-fg); }
 .pin.selected {
   width: 30px;
@@ -685,4 +685,15 @@ a.secondary {
 /* 詳細のラベルと経路ボタンの間をあける */
 a.primary.route {
   margin-top: 12px;
+}
+
+.pin-glyph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.pin.selected .pin-glyph svg {
+  width: 18px;
+  height: 18px;
 }

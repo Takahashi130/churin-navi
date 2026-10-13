@@ -59,7 +59,7 @@ export default function ConfirmForm({ facility: f, onDone }: Props) {
         body: JSON.stringify({
           passcode,
           // Google から借りた仮の名前は保存しない（表示時に毎回 Google から付け直す）
-          facility: { id: f.id, name: f.nameFromGoogle ? UNNAMED : f.name, location: f.location, googlePlaceId: f.googlePlaceId },
+          facility: { id: f.id, name: f.nameFromGoogle || f.provisionalName ? UNNAMED : f.name, location: f.location, googlePlaceId: f.googlePlaceId },
           result,
           pricing,
           payment: result === "temporary" && payment.length ? payment : undefined,

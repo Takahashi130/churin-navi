@@ -1,6 +1,7 @@
 "use client";
 
 import type { MapProps } from "./App";
+import BikeGlyph from "./BikeGlyph";
 import type { LatLng } from "@/lib/types";
 
 /**
@@ -75,9 +76,15 @@ export default function DemoMapView({ userPos, searchCenter, radius, facilities,
             style={{ cursor: "pointer" }}
           >
             <circle r={sel ? 34 : 26} className={`demo-pin ${f.tier}`} />
-            <text textAnchor="middle" dominantBaseline="central" fill="#fff" fontSize="28" fontWeight="700">
-              {f.tier === "verified" ? "✓" : f.tier === "bicycle" ? "P" : "?"}
-            </text>
+            {f.tier === "bicycle" ? (
+              <g transform="translate(-16 -16)" color="#fff">
+                <BikeGlyph size={32} />
+              </g>
+            ) : (
+              <text textAnchor="middle" dominantBaseline="central" fill={f.tier === "candidate" ? "#3d2c00" : "#fff"} fontSize="28" fontWeight="700">
+                {f.tier === "verified" ? "✓" : "?"}
+              </text>
+            )}
           </g>
         );
       })}
